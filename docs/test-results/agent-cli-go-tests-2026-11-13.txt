@@ -1,0 +1,29 @@
+?   	interview-project/cmd/fileshare	[no test files]
+?   	interview-project/cmd/server	[no test files]
+=== RUN   TestJSONFlagsConfigAndErrors
+--- PASS: TestJSONFlagsConfigAndErrors (0.00s)
+=== RUN   TestUploadPartialShareFailure
+--- PASS: TestUploadPartialShareFailure (0.00s)
+=== RUN   TestRedirectDoesNotLeakToken
+--- PASS: TestRedirectDoesNotLeakToken (0.00s)
+PASS
+ok  	interview-project/internal/cli	3.105s
+?   	interview-project/internal/config	[no test files]
+=== RUN   TestHTTPSharingLifecycle
+--- PASS: TestHTTPSharingLifecycle (0.05s)
+=== RUN   TestAllManagementRoutesRequireAuthentication
+--- PASS: TestAllManagementRoutesRequireAuthentication (0.02s)
+=== RUN   TestCookieAuthenticationAndCSRF
+--- PASS: TestCookieAuthenticationAndCSRF (0.04s)
+=== RUN   TestLimitsAndNoStorageExposure
+--- PASS: TestLimitsAndNoStorageExposure (0.03s)
+PASS
+ok  	interview-project/internal/httpapi	3.466s
+=== RUN   TestFileLifecycleAndPersistence
+--- PASS: TestFileLifecycleAndPersistence (0.05s)
+=== RUN   TestConcurrentShareAndDelete
+--- PASS: TestConcurrentShareAndDelete (0.03s)
+=== RUN   TestUploadLimitSearchAndCleanup
+--- PASS: TestUploadLimitSearchAndCleanup (0.03s)
+PASS
+ok  	interview-project/internal/store	3.912s

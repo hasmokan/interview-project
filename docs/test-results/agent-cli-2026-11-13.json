@@ -1,0 +1,1179 @@
+{
+  "started_at": "2026-11-13T20:31:58+08:00",
+  "tested_commit": "5e2dde8b6ef957ad1c23145b74ba35cf3600c822",
+  "environment": {
+    "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+    "python": "3.14.2",
+    "go": "go version go1.26.0 darwin/arm64",
+    "upload_limit_bytes": 1048576
+  },
+  "binary_sha256": {
+    "fileshare": "a2ad81a9ede000c9aa6041f017277b8f6c74fc1c350689bc293102b8d2c64715",
+    "server": "4f2f07d928c0623b0df40458ab7290e27a83b56377fc5301e09dbea70a6bb065"
+  },
+  "skill_sha256": "17aaa3197513fb5d50d1de5d2b17bbe3a70862f7e0a66f3cf97e1ef7b5aafff2",
+  "scope": "Real CLI processes against an isolated real service; Skill command workflows replayed from its instructions. Independent model selection and clarification behavior are not evaluated.",
+  "cases": [
+    {
+      "id": "C01",
+      "name": "Missing configuration produces a clear nonzero error",
+      "commands": [
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--json"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "configure FILESHARE_SERVER and FILESHARE_TOKEN or run config set first\n"
+        }
+      ],
+      "observations": {},
+      "status": "PASS",
+      "duration_ms": 7
+    },
+    {
+      "id": "C02",
+      "name": "Persist CLI configuration with permissions 0600 and no token echo",
+      "commands": [
+        {
+          "argv": [
+            "fileshare",
+            "config",
+            "set",
+            "--server",
+            "http://127.0.0.1:54906",
+            "--token",
+            "<redacted>",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"configured\":true,\"server\":\"http://127.0.0.1:54906\"}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"items\":[],\"page\":1,\"page_size\":20,\"total\":0}\n",
+          "stderr": ""
+        }
+      ],
+      "observations": {
+        "config_mode": "0600"
+      },
+      "status": "PASS",
+      "duration_ms": 12
+    },
+    {
+      "id": "C03",
+      "name": "Environment server/token override stored configuration",
+      "commands": [
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"items\":[],\"page\":1,\"page_size\":20,\"total\":0}\n",
+          "stderr": ""
+        }
+      ],
+      "observations": {},
+      "status": "PASS",
+      "duration_ms": 6
+    },
+    {
+      "id": "C04",
+      "name": "Upload from a path containing Chinese characters and spaces; private by default",
+      "commands": [
+        {
+          "argv": [
+            "fileshare",
+            "upload",
+            "<sandbox>/验收 文件夹/验收 报告.pdf",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"created_at\":1794573118871,\"file_id\":\"4445d976-9151-4adb-89a9-144aaa99d10b\",\"mime_type\":\"application/pdf\",\"name\":\"验收 报告.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "fileshare",
+            "get",
+            "4445d976-9151-4adb-89a9-144aaa99d10b",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"created_at\":1794573118871,\"file_id\":\"4445d976-9151-4adb-89a9-144aaa99d10b\",\"mime_type\":\"application/pdf\",\"name\":\"验收 报告.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590}\n",
+          "stderr": ""
+        }
+      ],
+      "observations": {},
+      "status": "PASS",
+      "duration_ms": 18
+    },
+    {
+      "id": "C05",
+      "name": "Skill upload-and-share command returns an accessible original PDF",
+      "commands": [
+        {
+          "argv": [
+            "fileshare",
+            "upload",
+            "<sandbox>/report.pdf",
+            "--share",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"created_at\":1794573118885,\"file_id\":\"d0d77891-e2e5-4334-9808-3e7567b88ac7\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"shared\",\"share_url\":\"http://127.0.0.1:54906/s/<redacted>\",\"size_bytes\":590}\n",
+          "stderr": ""
+        }
+      ],
+      "observations": {
+        "anonymous_content": [
+          {
+            "status": 200,
+            "body_sha256": "13411b25ff19c0069e73bcaec60a3921eae6ac1656928fa1e9e2213f6daf20d0"
+          }
+        ],
+        "original_sha256": "13411b25ff19c0069e73bcaec60a3921eae6ac1656928fa1e9e2213f6daf20d0"
+      },
+      "status": "PASS",
+      "duration_ms": 10
+    },
+    {
+      "id": "C06",
+      "name": "Search/list/get return the original ID/link without reuploading",
+      "commands": [
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--page-size",
+            "100",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"items\":[{\"created_at\":1794573118885,\"file_id\":\"d0d77891-e2e5-4334-9808-3e7567b88ac7\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"shared\",\"share_url\":\"http://127.0.0.1:54906/s/<redacted>\",\"size_bytes\":590},{\"created_at\":1794573118871,\"file_id\":\"4445d976-9151-4adb-89a9-144aaa99d10b\",\"mime_type\":\"application/pdf\",\"name\":\"验收 报告.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590}],\"page\":1,\"page_size\":100,\"total\":2}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--search",
+            "report.pdf",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"items\":[{\"created_at\":1794573118885,\"file_id\":\"d0d77891-e2e5-4334-9808-3e7567b88ac7\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"shared\",\"share_url\":\"http://127.0.0.1:54906/s/<redacted>\",\"size_bytes\":590}],\"page\":1,\"page_size\":20,\"total\":1}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "fileshare",
+            "get",
+            "d0d77891-e2e5-4334-9808-3e7567b88ac7",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"created_at\":1794573118885,\"file_id\":\"d0d77891-e2e5-4334-9808-3e7567b88ac7\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"shared\",\"share_url\":\"http://127.0.0.1:54906/s/<redacted>\",\"size_bytes\":590}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--page-size",
+            "100",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"items\":[{\"created_at\":1794573118885,\"file_id\":\"d0d77891-e2e5-4334-9808-3e7567b88ac7\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"shared\",\"share_url\":\"http://127.0.0.1:54906/s/<redacted>\",\"size_bytes\":590},{\"created_at\":1794573118871,\"file_id\":\"4445d976-9151-4adb-89a9-144aaa99d10b\",\"mime_type\":\"application/pdf\",\"name\":\"验收 报告.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590}],\"page\":1,\"page_size\":100,\"total\":2}\n",
+          "stderr": ""
+        }
+      ],
+      "observations": {},
+      "status": "PASS",
+      "duration_ms": 20
+    },
+    {
+      "id": "C07",
+      "name": "Repeated share is idempotent",
+      "commands": [
+        {
+          "argv": [
+            "fileshare",
+            "share",
+            "d0d77891-e2e5-4334-9808-3e7567b88ac7",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"created_at\":1794573118885,\"file_id\":\"d0d77891-e2e5-4334-9808-3e7567b88ac7\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"shared\",\"share_url\":\"http://127.0.0.1:54906/s/<redacted>\",\"size_bytes\":590}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "fileshare",
+            "share",
+            "d0d77891-e2e5-4334-9808-3e7567b88ac7",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"created_at\":1794573118885,\"file_id\":\"d0d77891-e2e5-4334-9808-3e7567b88ac7\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"shared\",\"share_url\":\"http://127.0.0.1:54906/s/<redacted>\",\"size_bytes\":590}\n",
+          "stderr": ""
+        }
+      ],
+      "observations": {},
+      "status": "PASS",
+      "duration_ms": 9
+    },
+    {
+      "id": "C08",
+      "name": "Revoke keeps the file, rejects old content, and supports repeated revoke",
+      "commands": [
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--page-size",
+            "100",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"items\":[{\"created_at\":1794573118885,\"file_id\":\"d0d77891-e2e5-4334-9808-3e7567b88ac7\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"shared\",\"share_url\":\"http://127.0.0.1:54906/s/<redacted>\",\"size_bytes\":590},{\"created_at\":1794573118871,\"file_id\":\"4445d976-9151-4adb-89a9-144aaa99d10b\",\"mime_type\":\"application/pdf\",\"name\":\"验收 报告.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590}],\"page\":1,\"page_size\":100,\"total\":2}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "fileshare",
+            "revoke",
+            "d0d77891-e2e5-4334-9808-3e7567b88ac7",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"created_at\":1794573118885,\"file_id\":\"d0d77891-e2e5-4334-9808-3e7567b88ac7\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "fileshare",
+            "revoke",
+            "d0d77891-e2e5-4334-9808-3e7567b88ac7",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"created_at\":1794573118885,\"file_id\":\"d0d77891-e2e5-4334-9808-3e7567b88ac7\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "fileshare",
+            "get",
+            "d0d77891-e2e5-4334-9808-3e7567b88ac7",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"created_at\":1794573118885,\"file_id\":\"d0d77891-e2e5-4334-9808-3e7567b88ac7\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--page-size",
+            "100",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"items\":[{\"created_at\":1794573118885,\"file_id\":\"d0d77891-e2e5-4334-9808-3e7567b88ac7\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590},{\"created_at\":1794573118871,\"file_id\":\"4445d976-9151-4adb-89a9-144aaa99d10b\",\"mime_type\":\"application/pdf\",\"name\":\"验收 报告.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590}],\"page\":1,\"page_size\":100,\"total\":2}\n",
+          "stderr": ""
+        }
+      ],
+      "observations": {
+        "anonymous_content": [
+          {
+            "status": 404,
+            "body_sha256": "5579d1c0f3c8f89473e0e8498a5fd9a3d49c97fc0d5028767b3630f32e3bce30"
+          }
+        ]
+      },
+      "status": "PASS",
+      "duration_ms": 26
+    },
+    {
+      "id": "C09",
+      "name": "Reshare creates a new link while the old link stays invalid",
+      "commands": [
+        {
+          "argv": [
+            "fileshare",
+            "share",
+            "d0d77891-e2e5-4334-9808-3e7567b88ac7",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"created_at\":1794573118885,\"file_id\":\"d0d77891-e2e5-4334-9808-3e7567b88ac7\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"shared\",\"share_url\":\"http://127.0.0.1:54906/s/<redacted>\",\"size_bytes\":590}\n",
+          "stderr": ""
+        }
+      ],
+      "observations": {
+        "anonymous_content": [
+          {
+            "status": 404,
+            "body_sha256": "5579d1c0f3c8f89473e0e8498a5fd9a3d49c97fc0d5028767b3630f32e3bce30"
+          },
+          {
+            "status": 200,
+            "body_sha256": "13411b25ff19c0069e73bcaec60a3921eae6ac1656928fa1e9e2213f6daf20d0"
+          }
+        ],
+        "link_changed": true
+      },
+      "status": "PASS",
+      "duration_ms": 7
+    },
+    {
+      "id": "C10",
+      "name": "Same-name candidates expose distinct IDs with no query side effects",
+      "commands": [
+        {
+          "argv": [
+            "fileshare",
+            "upload",
+            "<sandbox>/report.pdf",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"created_at\":1794573118959,\"file_id\":\"04c426ac-76df-450a-bf5e-907f2c20de5b\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--page-size",
+            "100",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"items\":[{\"created_at\":1794573118959,\"file_id\":\"04c426ac-76df-450a-bf5e-907f2c20de5b\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590},{\"created_at\":1794573118885,\"file_id\":\"d0d77891-e2e5-4334-9808-3e7567b88ac7\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"shared\",\"share_url\":\"http://127.0.0.1:54906/s/<redacted>\",\"size_bytes\":590},{\"created_at\":1794573118871,\"file_id\":\"4445d976-9151-4adb-89a9-144aaa99d10b\",\"mime_type\":\"application/pdf\",\"name\":\"验收 报告.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590}],\"page\":1,\"page_size\":100,\"total\":3}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--search",
+            "report.pdf",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"items\":[{\"created_at\":1794573118959,\"file_id\":\"04c426ac-76df-450a-bf5e-907f2c20de5b\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590},{\"created_at\":1794573118885,\"file_id\":\"d0d77891-e2e5-4334-9808-3e7567b88ac7\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"shared\",\"share_url\":\"http://127.0.0.1:54906/s/<redacted>\",\"size_bytes\":590}],\"page\":1,\"page_size\":20,\"total\":2}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--page-size",
+            "100",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"items\":[{\"created_at\":1794573118959,\"file_id\":\"04c426ac-76df-450a-bf5e-907f2c20de5b\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590},{\"created_at\":1794573118885,\"file_id\":\"d0d77891-e2e5-4334-9808-3e7567b88ac7\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"shared\",\"share_url\":\"http://127.0.0.1:54906/s/<redacted>\",\"size_bytes\":590},{\"created_at\":1794573118871,\"file_id\":\"4445d976-9151-4adb-89a9-144aaa99d10b\",\"mime_type\":\"application/pdf\",\"name\":\"验收 报告.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590}],\"page\":1,\"page_size\":100,\"total\":3}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "fileshare",
+            "get",
+            "d0d77891-e2e5-4334-9808-3e7567b88ac7",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"created_at\":1794573118885,\"file_id\":\"d0d77891-e2e5-4334-9808-3e7567b88ac7\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"shared\",\"share_url\":\"http://127.0.0.1:54906/s/<redacted>\",\"size_bytes\":590}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "fileshare",
+            "get",
+            "04c426ac-76df-450a-bf5e-907f2c20de5b",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"created_at\":1794573118959,\"file_id\":\"04c426ac-76df-450a-bf5e-907f2c20de5b\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590}\n",
+          "stderr": ""
+        }
+      ],
+      "observations": {
+        "candidates": [
+          {
+            "file_id": "04c426ac-76df-450a-bf5e-907f2c20de5b",
+            "share_status": "unshared"
+          },
+          {
+            "file_id": "d0d77891-e2e5-4334-9808-3e7567b88ac7",
+            "share_status": "shared"
+          }
+        ]
+      },
+      "status": "PASS",
+      "duration_ms": 35
+    },
+    {
+      "id": "C11",
+      "name": "Pagination can retrieve all candidates without missing IDs",
+      "commands": [
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--search",
+            "report.pdf",
+            "--page-size",
+            "1",
+            "--page",
+            "1",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"items\":[{\"created_at\":1794573118959,\"file_id\":\"04c426ac-76df-450a-bf5e-907f2c20de5b\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590}],\"page\":1,\"page_size\":1,\"total\":2}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--search",
+            "report.pdf",
+            "--page-size",
+            "1",
+            "--page",
+            "2",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"items\":[{\"created_at\":1794573118885,\"file_id\":\"d0d77891-e2e5-4334-9808-3e7567b88ac7\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"shared\",\"share_url\":\"http://127.0.0.1:54906/s/<redacted>\",\"size_bytes\":590}],\"page\":2,\"page_size\":1,\"total\":2}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--search",
+            "report.pdf",
+            "--page-size",
+            "1",
+            "--page",
+            "3",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"items\":[],\"page\":3,\"page_size\":1,\"total\":2}\n",
+          "stderr": ""
+        }
+      ],
+      "observations": {},
+      "status": "PASS",
+      "duration_ms": 14
+    },
+    {
+      "id": "C12",
+      "name": "Explicit delete invalidates its link and leaves the same-name sibling intact",
+      "commands": [
+        {
+          "argv": [
+            "fileshare",
+            "delete",
+            "d0d77891-e2e5-4334-9808-3e7567b88ac7",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"deleted\":true,\"file_id\":\"d0d77891-e2e5-4334-9808-3e7567b88ac7\"}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "fileshare",
+            "delete",
+            "d0d77891-e2e5-4334-9808-3e7567b88ac7",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"deleted\":true,\"file_id\":\"d0d77891-e2e5-4334-9808-3e7567b88ac7\"}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "fileshare",
+            "get",
+            "d0d77891-e2e5-4334-9808-3e7567b88ac7",
+            "--json"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "not_found: 文件不存在或分享已失效 (HTTP 404)\n"
+        },
+        {
+          "argv": [
+            "fileshare",
+            "share",
+            "d0d77891-e2e5-4334-9808-3e7567b88ac7",
+            "--json"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "not_found: 文件不存在或分享已失效 (HTTP 404)\n"
+        },
+        {
+          "argv": [
+            "fileshare",
+            "get",
+            "04c426ac-76df-450a-bf5e-907f2c20de5b",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"created_at\":1794573118959,\"file_id\":\"04c426ac-76df-450a-bf5e-907f2c20de5b\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590}\n",
+          "stderr": ""
+        }
+      ],
+      "observations": {
+        "anonymous_content": [
+          {
+            "status": 404,
+            "body_sha256": "5579d1c0f3c8f89473e0e8498a5fd9a3d49c97fc0d5028767b3630f32e3bce30"
+          }
+        ]
+      },
+      "status": "PASS",
+      "duration_ms": 29
+    },
+    {
+      "id": "C13",
+      "name": "Missing local path fails without uploading",
+      "commands": [
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--page-size",
+            "100",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"items\":[{\"created_at\":1794573118959,\"file_id\":\"04c426ac-76df-450a-bf5e-907f2c20de5b\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590},{\"created_at\":1794573118871,\"file_id\":\"4445d976-9151-4adb-89a9-144aaa99d10b\",\"mime_type\":\"application/pdf\",\"name\":\"验收 报告.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590}],\"page\":1,\"page_size\":100,\"total\":2}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "fileshare",
+            "upload",
+            "<sandbox>/missing.pdf",
+            "--share",
+            "--json"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "cannot open local file\n"
+        },
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--page-size",
+            "100",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"items\":[{\"created_at\":1794573118959,\"file_id\":\"04c426ac-76df-450a-bf5e-907f2c20de5b\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590},{\"created_at\":1794573118871,\"file_id\":\"4445d976-9151-4adb-89a9-144aaa99d10b\",\"mime_type\":\"application/pdf\",\"name\":\"验收 报告.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590}],\"page\":1,\"page_size\":100,\"total\":2}\n",
+          "stderr": ""
+        }
+      ],
+      "observations": {},
+      "status": "PASS",
+      "duration_ms": 17
+    },
+    {
+      "id": "C14",
+      "name": "Directory paths fail without uploading",
+      "commands": [
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--page-size",
+            "100",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"items\":[{\"created_at\":1794573118959,\"file_id\":\"04c426ac-76df-450a-bf5e-907f2c20de5b\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590},{\"created_at\":1794573118871,\"file_id\":\"4445d976-9151-4adb-89a9-144aaa99d10b\",\"mime_type\":\"application/pdf\",\"name\":\"验收 报告.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590}],\"page\":1,\"page_size\":100,\"total\":2}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "fileshare",
+            "upload",
+            "<sandbox>",
+            "--json"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "upload path must be a regular file\n"
+        },
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--page-size",
+            "100",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"items\":[{\"created_at\":1794573118959,\"file_id\":\"04c426ac-76df-450a-bf5e-907f2c20de5b\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590},{\"created_at\":1794573118871,\"file_id\":\"4445d976-9151-4adb-89a9-144aaa99d10b\",\"mime_type\":\"application/pdf\",\"name\":\"验收 报告.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590}],\"page\":1,\"page_size\":100,\"total\":2}\n",
+          "stderr": ""
+        }
+      ],
+      "observations": {},
+      "status": "PASS",
+      "duration_ms": 19
+    },
+    {
+      "id": "C15",
+      "name": "Invalid token is rejected for every management command",
+      "commands": [
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--page-size",
+            "100",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"items\":[{\"created_at\":1794573118959,\"file_id\":\"04c426ac-76df-450a-bf5e-907f2c20de5b\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590},{\"created_at\":1794573118871,\"file_id\":\"4445d976-9151-4adb-89a9-144aaa99d10b\",\"mime_type\":\"application/pdf\",\"name\":\"验收 报告.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590}],\"page\":1,\"page_size\":100,\"total\":2}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--json"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "unauthorized: 访问令牌无效 (HTTP 401)\n"
+        },
+        {
+          "argv": [
+            "fileshare",
+            "get",
+            "4445d976-9151-4adb-89a9-144aaa99d10b",
+            "--json"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "unauthorized: 访问令牌无效 (HTTP 401)\n"
+        },
+        {
+          "argv": [
+            "fileshare",
+            "share",
+            "4445d976-9151-4adb-89a9-144aaa99d10b",
+            "--json"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "unauthorized: 访问令牌无效 (HTTP 401)\n"
+        },
+        {
+          "argv": [
+            "fileshare",
+            "revoke",
+            "4445d976-9151-4adb-89a9-144aaa99d10b",
+            "--json"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "unauthorized: 访问令牌无效 (HTTP 401)\n"
+        },
+        {
+          "argv": [
+            "fileshare",
+            "delete",
+            "4445d976-9151-4adb-89a9-144aaa99d10b",
+            "--json"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "unauthorized: 访问令牌无效 (HTTP 401)\n"
+        },
+        {
+          "argv": [
+            "fileshare",
+            "upload",
+            "<sandbox>/report.pdf",
+            "--json"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "unauthorized: 访问令牌无效 (HTTP 401)\n"
+        },
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--page-size",
+            "100",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"items\":[{\"created_at\":1794573118959,\"file_id\":\"04c426ac-76df-450a-bf5e-907f2c20de5b\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590},{\"created_at\":1794573118871,\"file_id\":\"4445d976-9151-4adb-89a9-144aaa99d10b\",\"mime_type\":\"application/pdf\",\"name\":\"验收 报告.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590}],\"page\":1,\"page_size\":100,\"total\":2}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "fileshare",
+            "get",
+            "4445d976-9151-4adb-89a9-144aaa99d10b",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"created_at\":1794573118871,\"file_id\":\"4445d976-9151-4adb-89a9-144aaa99d10b\",\"mime_type\":\"application/pdf\",\"name\":\"验收 报告.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590}\n",
+          "stderr": ""
+        }
+      ],
+      "observations": {},
+      "status": "PASS",
+      "duration_ms": 44
+    },
+    {
+      "id": "C16",
+      "name": "Exact upload limit succeeds; one byte over fails with 413 and no extra record",
+      "commands": [
+        {
+          "argv": [
+            "fileshare",
+            "upload",
+            "<sandbox>/boundary.bin",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"created_at\":1794573119120,\"file_id\":\"3ef64e27-5679-48f5-8af1-57f7bca3cf8f\",\"mime_type\":\"text/plain; charset=utf-8\",\"name\":\"boundary.bin\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":1048576}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--page-size",
+            "100",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"items\":[{\"created_at\":1794573119120,\"file_id\":\"3ef64e27-5679-48f5-8af1-57f7bca3cf8f\",\"mime_type\":\"text/plain; charset=utf-8\",\"name\":\"boundary.bin\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":1048576},{\"created_at\":1794573118959,\"file_id\":\"04c426ac-76df-450a-bf5e-907f2c20de5b\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590},{\"created_at\":1794573118871,\"file_id\":\"4445d976-9151-4adb-89a9-144aaa99d10b\",\"mime_type\":\"application/pdf\",\"name\":\"验收 报告.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590}],\"page\":1,\"page_size\":100,\"total\":3}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "fileshare",
+            "upload",
+            "<sandbox>/boundary.bin",
+            "--share",
+            "--json"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "file_too_large: 文件超过上传大小限制 (HTTP 413)\n"
+        },
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--page-size",
+            "100",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"items\":[{\"created_at\":1794573119120,\"file_id\":\"3ef64e27-5679-48f5-8af1-57f7bca3cf8f\",\"mime_type\":\"text/plain; charset=utf-8\",\"name\":\"boundary.bin\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":1048576},{\"created_at\":1794573118959,\"file_id\":\"04c426ac-76df-450a-bf5e-907f2c20de5b\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590},{\"created_at\":1794573118871,\"file_id\":\"4445d976-9151-4adb-89a9-144aaa99d10b\",\"mime_type\":\"application/pdf\",\"name\":\"验收 报告.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590}],\"page\":1,\"page_size\":100,\"total\":3}\n",
+          "stderr": ""
+        }
+      ],
+      "observations": {
+        "limit_bytes": 1048576,
+        "rejected_bytes": 1048577
+      },
+      "status": "PASS",
+      "duration_ms": 32
+    },
+    {
+      "id": "C17",
+      "name": "An unreachable service fails clearly without a fake result",
+      "commands": [
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--timeout",
+            "1s",
+            "--json"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "request failed: check server address, connectivity and timeout\n"
+        }
+      ],
+      "observations": {},
+      "status": "PASS",
+      "duration_ms": 1006
+    },
+    {
+      "id": "C18",
+      "name": "Unknown file ID returns a nonzero 404 error",
+      "commands": [
+        {
+          "argv": [
+            "fileshare",
+            "get",
+            "missing-file-id",
+            "--json"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "not_found: 文件不存在或分享已失效 (HTTP 404)\n"
+        },
+        {
+          "argv": [
+            "fileshare",
+            "share",
+            "missing-file-id",
+            "--json"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "not_found: 文件不存在或分享已失效 (HTTP 404)\n"
+        },
+        {
+          "argv": [
+            "fileshare",
+            "revoke",
+            "missing-file-id",
+            "--json"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "not_found: 文件不存在或分享已失效 (HTTP 404)\n"
+        },
+        {
+          "argv": [
+            "fileshare",
+            "delete",
+            "missing-file-id",
+            "--json"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "not_found: 文件不存在或分享已失效 (HTTP 404)\n"
+        }
+      ],
+      "observations": {},
+      "status": "PASS",
+      "duration_ms": 31
+    },
+    {
+      "id": "C19",
+      "name": "Missing arguments, unknown flags and invalid timeout fail clearly",
+      "commands": [
+        {
+          "argv": [
+            "fileshare",
+            "get",
+            "--json"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "get requires exactly one file path or file ID\n"
+        },
+        {
+          "argv": [
+            "fileshare",
+            "upload",
+            "--unknown",
+            "--json"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "unknown flag --unknown\n"
+        },
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--timeout",
+            "0s",
+            "--json"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "timeout must be positive\n"
+        },
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--page",
+            "0",
+            "--json"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "invalid_request: 分页或搜索参数无效 (HTTP 400)\n"
+        }
+      ],
+      "observations": {},
+      "status": "PASS",
+      "duration_ms": 22
+    },
+    {
+      "id": "C20",
+      "name": "JSON flags work before or after the file ID",
+      "commands": [
+        {
+          "argv": [
+            "fileshare",
+            "get",
+            "--json",
+            "4445d976-9151-4adb-89a9-144aaa99d10b"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"created_at\":1794573118871,\"file_id\":\"4445d976-9151-4adb-89a9-144aaa99d10b\",\"mime_type\":\"application/pdf\",\"name\":\"验收 报告.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "fileshare",
+            "get",
+            "4445d976-9151-4adb-89a9-144aaa99d10b",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"created_at\":1794573118871,\"file_id\":\"4445d976-9151-4adb-89a9-144aaa99d10b\",\"mime_type\":\"application/pdf\",\"name\":\"验收 报告.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590}\n",
+          "stderr": ""
+        }
+      ],
+      "observations": {},
+      "status": "PASS",
+      "duration_ms": 14
+    },
+    {
+      "id": "C21",
+      "name": "Upload-success/share-failure reports the ID; retry shares it without reuploading",
+      "commands": [
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--page-size",
+            "100",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"items\":[{\"created_at\":1794573119120,\"file_id\":\"3ef64e27-5679-48f5-8af1-57f7bca3cf8f\",\"mime_type\":\"text/plain; charset=utf-8\",\"name\":\"boundary.bin\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":1048576},{\"created_at\":1794573118959,\"file_id\":\"04c426ac-76df-450a-bf5e-907f2c20de5b\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590},{\"created_at\":1794573118871,\"file_id\":\"4445d976-9151-4adb-89a9-144aaa99d10b\",\"mime_type\":\"application/pdf\",\"name\":\"验收 报告.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590}],\"page\":1,\"page_size\":100,\"total\":3}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "fileshare",
+            "upload",
+            "<sandbox>/report.pdf",
+            "--share",
+            "--json"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "upload succeeded (file_id=c245040b-2c73-4b2f-ab9c-818ed8d3e09a), sharing failed; retry fileshare share c245040b-2c73-4b2f-ab9c-818ed8d3e09a --json: injected_failure: controlled share failure (HTTP 500)\n"
+        },
+        {
+          "argv": [
+            "fileshare",
+            "get",
+            "c245040b-2c73-4b2f-ab9c-818ed8d3e09a",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"created_at\":1794573120234,\"file_id\":\"c245040b-2c73-4b2f-ab9c-818ed8d3e09a\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--page-size",
+            "100",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"items\":[{\"created_at\":1794573120234,\"file_id\":\"c245040b-2c73-4b2f-ab9c-818ed8d3e09a\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590},{\"created_at\":1794573119120,\"file_id\":\"3ef64e27-5679-48f5-8af1-57f7bca3cf8f\",\"mime_type\":\"text/plain; charset=utf-8\",\"name\":\"boundary.bin\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":1048576},{\"created_at\":1794573118959,\"file_id\":\"04c426ac-76df-450a-bf5e-907f2c20de5b\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590},{\"created_at\":1794573118871,\"file_id\":\"4445d976-9151-4adb-89a9-144aaa99d10b\",\"mime_type\":\"application/pdf\",\"name\":\"验收 报告.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590}],\"page\":1,\"page_size\":100,\"total\":4}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "fileshare",
+            "share",
+            "c245040b-2c73-4b2f-ab9c-818ed8d3e09a",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"created_at\":1794573120234,\"file_id\":\"c245040b-2c73-4b2f-ab9c-818ed8d3e09a\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"shared\",\"share_url\":\"http://127.0.0.1:54906/s/<redacted>\",\"size_bytes\":590}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--page-size",
+            "100",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"items\":[{\"created_at\":1794573120234,\"file_id\":\"c245040b-2c73-4b2f-ab9c-818ed8d3e09a\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"shared\",\"share_url\":\"http://127.0.0.1:54906/s/<redacted>\",\"size_bytes\":590},{\"created_at\":1794573119120,\"file_id\":\"3ef64e27-5679-48f5-8af1-57f7bca3cf8f\",\"mime_type\":\"text/plain; charset=utf-8\",\"name\":\"boundary.bin\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":1048576},{\"created_at\":1794573118959,\"file_id\":\"04c426ac-76df-450a-bf5e-907f2c20de5b\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590},{\"created_at\":1794573118871,\"file_id\":\"4445d976-9151-4adb-89a9-144aaa99d10b\",\"mime_type\":\"application/pdf\",\"name\":\"验收 报告.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590}],\"page\":1,\"page_size\":100,\"total\":4}\n",
+          "stderr": ""
+        }
+      ],
+      "observations": {
+        "anonymous_content": [
+          {
+            "status": 200,
+            "body_sha256": "13411b25ff19c0069e73bcaec60a3921eae6ac1656928fa1e9e2213f6daf20d0"
+          }
+        ],
+        "recovered_file_id": "c245040b-2c73-4b2f-ab9c-818ed8d3e09a"
+      },
+      "status": "PASS",
+      "duration_ms": 90
+    },
+    {
+      "id": "C22",
+      "name": "Configured request timeout produces a bounded failure",
+      "commands": [
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--timeout",
+            "50ms",
+            "--json"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "request failed: check server address, connectivity and timeout\n"
+        }
+      ],
+      "observations": {},
+      "status": "PASS",
+      "duration_ms": 110
+    },
+    {
+      "id": "C23",
+      "name": "Malformed API JSON fails without a success payload",
+      "commands": [
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--json"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "invalid API response (HTTP 200)\n"
+        }
+      ],
+      "observations": {},
+      "status": "PASS",
+      "duration_ms": 59
+    },
+    {
+      "id": "C24",
+      "name": "HTTP redirects are not followed with a management token",
+      "commands": [
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--json"
+          ],
+          "exit_code": 1,
+          "stdout": "",
+          "stderr": "redirect: redirect blocked (HTTP 302)\n"
+        }
+      ],
+      "observations": {},
+      "status": "PASS",
+      "duration_ms": 104
+    },
+    {
+      "id": "C25",
+      "name": "Search treats percent and underscore as literal filename characters",
+      "commands": [
+        {
+          "argv": [
+            "fileshare",
+            "upload",
+            "<sandbox>/100%_报告.txt",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"created_at\":1794573120589,\"file_id\":\"0eeea64d-afbe-4eb5-8aaa-359f999be5a1\",\"mime_type\":\"text/plain; charset=utf-8\",\"name\":\"100%_报告.txt\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":24}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "fileshare",
+            "upload",
+            "<sandbox>/100ab报告.txt",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"created_at\":1794573120599,\"file_id\":\"d8738ef0-ca4f-40de-bbbd-1a1ea39b4a09\",\"mime_type\":\"text/plain; charset=utf-8\",\"name\":\"100ab报告.txt\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":24}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "fileshare",
+            "list",
+            "--search",
+            "%_",
+            "--json"
+          ],
+          "exit_code": 0,
+          "stdout": "{\"items\":[{\"created_at\":1794573120589,\"file_id\":\"0eeea64d-afbe-4eb5-8aaa-359f999be5a1\",\"mime_type\":\"text/plain; charset=utf-8\",\"name\":\"100%_报告.txt\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":24}],\"page\":1,\"page_size\":20,\"total\":1}\n",
+          "stderr": ""
+        }
+      ],
+      "observations": {},
+      "status": "PASS",
+      "duration_ms": 29
+    },
+    {
+      "id": "C26",
+      "name": "No credential appears in captured output or server logs; only logical foreign keys",
+      "commands": [],
+      "observations": {
+        "foreign_key_count": 0
+      },
+      "status": "PASS",
+      "duration_ms": 1
+    }
+  ],
+  "finished_at": "2026-11-13T20:32:00+08:00",
+  "passed": 26,
+  "failed": 0
+}

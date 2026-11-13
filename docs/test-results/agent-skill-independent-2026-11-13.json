@@ -1,0 +1,498 @@
+{
+  "first_phase": {
+    "kind": "independent_skill_forward_test",
+    "skill": "<project>/skills/fileshare/SKILL.md",
+    "environment": {
+      "config_path": "<sandbox>/cli.json",
+      "environment_unset": [
+        "FILESHARE_SERVER",
+        "FILESHARE_TOKEN"
+      ],
+      "cli_directory": "<project>/work/agent-cli/bin",
+      "config_contents_read": false
+    },
+    "cases": [
+      {
+        "request": "把本地 <sandbox>/团队周报.pdf 分享出去，把链接给我。",
+        "precheck": {
+          "command": "test -f '<sandbox>/团队周报.pdf'",
+          "exit_code": 0,
+          "output": ""
+        },
+        "executions": [
+          {
+            "command": "env -u FILESHARE_SERVER -u FILESHARE_TOKEN FILESHARE_CONFIG='<sandbox>/cli.json' PATH=\"<project>/work/agent-cli/bin:$PATH\" fileshare upload '<sandbox>/团队周报.pdf' --share --json",
+            "exit_code": 0,
+            "output": "{\"created_at\":1794573233781,\"file_id\":\"92910bd9-7232-417c-8ff4-94b298028050\",\"mime_type\":\"application/pdf\",\"name\":\"团队周报.pdf\",\"share_status\":\"shared\",\"share_url\":\"http://127.0.0.1:54814/s/<redacted>\",\"size_bytes\":590}\n",
+            "json": {
+              "created_at": 1794573233781,
+              "file_id": "92910bd9-7232-417c-8ff4-94b298028050",
+              "mime_type": "application/pdf",
+              "name": "团队周报.pdf",
+              "share_status": "shared",
+              "share_url": "http://127.0.0.1:54814/s/<redacted>",
+              "size_bytes": 590
+            }
+          }
+        ],
+        "result": "completed",
+        "proposed_reply": "已分享《团队周报.pdf》：[分享链接](http://127.0.0.1:54814/s/<redacted>)。"
+      },
+      {
+        "request": "查一下刚才的团队周报.pdf，把状态和链接给我。",
+        "executions": [
+          {
+            "command": "env -u FILESHARE_SERVER -u FILESHARE_TOKEN FILESHARE_CONFIG='<sandbox>/cli.json' PATH=\"<project>/work/agent-cli/bin:$PATH\" fileshare get 92910bd9-7232-417c-8ff4-94b298028050 --json",
+            "exit_code": 0,
+            "output": "{\"created_at\":1794573233781,\"file_id\":\"92910bd9-7232-417c-8ff4-94b298028050\",\"mime_type\":\"application/pdf\",\"name\":\"团队周报.pdf\",\"share_status\":\"shared\",\"share_url\":\"http://127.0.0.1:54814/s/<redacted>\",\"size_bytes\":590}\n",
+            "json": {
+              "created_at": 1794573233781,
+              "file_id": "92910bd9-7232-417c-8ff4-94b298028050",
+              "mime_type": "application/pdf",
+              "name": "团队周报.pdf",
+              "share_status": "shared",
+              "share_url": "http://127.0.0.1:54814/s/<redacted>",
+              "size_bytes": 590
+            }
+          }
+        ],
+        "result": "completed",
+        "proposed_reply": "《团队周报.pdf》当前已分享。\n\n文件 ID：92910bd9-7232-417c-8ff4-94b298028050\n\n[分享链接](http://127.0.0.1:54814/s/<redacted>)。"
+      },
+      {
+        "request": "停止刚才团队周报.pdf 的分享。",
+        "executions": [
+          {
+            "command": "env -u FILESHARE_SERVER -u FILESHARE_TOKEN FILESHARE_CONFIG='<sandbox>/cli.json' PATH=\"<project>/work/agent-cli/bin:$PATH\" fileshare revoke 92910bd9-7232-417c-8ff4-94b298028050 --json",
+            "exit_code": 0,
+            "output": "{\"created_at\":1794573233781,\"file_id\":\"92910bd9-7232-417c-8ff4-94b298028050\",\"mime_type\":\"application/pdf\",\"name\":\"团队周报.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590}\n",
+            "json": {
+              "created_at": 1794573233781,
+              "file_id": "92910bd9-7232-417c-8ff4-94b298028050",
+              "mime_type": "application/pdf",
+              "name": "团队周报.pdf",
+              "share_status": "unshared",
+              "share_url": null,
+              "size_bytes": 590
+            }
+          }
+        ],
+        "result": "completed",
+        "proposed_reply": "已停止《团队周报.pdf》的分享，原链接已失效，文件仍保留。"
+      },
+      {
+        "request": "把 report.pdf 的分享停掉。",
+        "executions": [
+          {
+            "command": "env -u FILESHARE_SERVER -u FILESHARE_TOKEN FILESHARE_CONFIG='<sandbox>/cli.json' PATH=\"<project>/work/agent-cli/bin:$PATH\" fileshare list --search 'report.pdf' --page 1 --page-size 20 --json",
+            "exit_code": 0,
+            "output": "{\"items\":[{\"created_at\":1794573089508,\"file_id\":\"6e5042f5-2c9e-4460-81fe-92a77650169c\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"shared\",\"share_url\":\"http://127.0.0.1:54814/s/<redacted>\",\"size_bytes\":610},{\"created_at\":1794573089495,\"file_id\":\"6d84f7dd-8191-45c9-b90d-36f73aa04c94\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"shared\",\"share_url\":\"http://127.0.0.1:54814/s/<redacted>\",\"size_bytes\":610}],\"page\":1,\"page_size\":20,\"total\":2}\n",
+            "json": {
+              "items": [
+                {
+                  "created_at": 1794573089508,
+                  "file_id": "6e5042f5-2c9e-4460-81fe-92a77650169c",
+                  "mime_type": "application/pdf",
+                  "name": "report.pdf",
+                  "share_status": "shared",
+                  "share_url": "http://127.0.0.1:54814/s/<redacted>",
+                  "size_bytes": 610
+                },
+                {
+                  "created_at": 1794573089495,
+                  "file_id": "6d84f7dd-8191-45c9-b90d-36f73aa04c94",
+                  "mime_type": "application/pdf",
+                  "name": "report.pdf",
+                  "share_status": "shared",
+                  "share_url": "http://127.0.0.1:54814/s/<redacted>",
+                  "size_bytes": 610
+                }
+              ],
+              "page": 1,
+              "page_size": 20,
+              "total": 2
+            }
+          }
+        ],
+        "result": "clarification_required",
+        "reason": "total 为 2，两个候选名称均为 report.pdf，且都处于 shared 状态。尚未执行 revoke。",
+        "proposed_reply": "查到两个同名的 report.pdf，目前均为“已分享”。请确认要停止分享的文件 ID：\n\n- 6e5042f5-2c9e-4460-81fe-92a77650169c\n- 6d84f7dd-8191-45c9-b90d-36f73aa04c94"
+      }
+    ]
+  },
+  "followup": {
+    "kind": "independent_skill_forward_test_followup",
+    "previous_evidence": "skill-independent-forward-test.json",
+    "skill": "<project>/skills/fileshare/SKILL.md",
+    "environment": {
+      "config_path": "<sandbox>/cli.json",
+      "environment_unset": [
+        "FILESHARE_SERVER",
+        "FILESHARE_TOKEN"
+      ],
+      "cli_directory": "<project>/work/agent-cli/bin",
+      "config_contents_read": false
+    },
+    "cases": [
+      {
+        "case": 4,
+        "request": "选文件 ID 6e5042f5-2c9e-4460-81fe-92a77650169c，停止它的分享。",
+        "executions": [
+          {
+            "command": "env -u FILESHARE_SERVER -u FILESHARE_TOKEN FILESHARE_CONFIG='<sandbox>/cli.json' PATH=\"<project>/work/agent-cli/bin:$PATH\" fileshare revoke 6e5042f5-2c9e-4460-81fe-92a77650169c --json",
+            "exit_code": 0,
+            "output": "{\"created_at\":1794573089508,\"file_id\":\"6e5042f5-2c9e-4460-81fe-92a77650169c\",\"mime_type\":\"application/pdf\",\"name\":\"report.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":610}\n",
+            "json": {
+              "created_at": 1794573089508,
+              "file_id": "6e5042f5-2c9e-4460-81fe-92a77650169c",
+              "mime_type": "application/pdf",
+              "name": "report.pdf",
+              "share_status": "unshared",
+              "share_url": null,
+              "size_bytes": 610
+            }
+          }
+        ],
+        "result": "completed",
+        "proposed_reply": "已停止 report.pdf（ID：6e5042f5-2c9e-4460-81fe-92a77650169c）的分享，原链接已失效，文件仍保留。"
+      },
+      {
+        "case": 5,
+        "request": "把刚才的团队周报.pdf 重新分享，把链接给我。",
+        "executions": [
+          {
+            "command": "env -u FILESHARE_SERVER -u FILESHARE_TOKEN FILESHARE_CONFIG='<sandbox>/cli.json' PATH=\"<project>/work/agent-cli/bin:$PATH\" fileshare share 92910bd9-7232-417c-8ff4-94b298028050 --json",
+            "exit_code": 0,
+            "output": "{\"created_at\":1794573233781,\"file_id\":\"92910bd9-7232-417c-8ff4-94b298028050\",\"mime_type\":\"application/pdf\",\"name\":\"团队周报.pdf\",\"share_status\":\"shared\",\"share_url\":\"http://127.0.0.1:54814/s/<redacted>\",\"size_bytes\":590}\n",
+            "json": {
+              "created_at": 1794573233781,
+              "file_id": "92910bd9-7232-417c-8ff4-94b298028050",
+              "mime_type": "application/pdf",
+              "name": "团队周报.pdf",
+              "share_status": "shared",
+              "share_url": "http://127.0.0.1:54814/s/<redacted>",
+              "size_bytes": 590
+            }
+          }
+        ],
+        "result": "completed",
+        "checks": {
+          "same_file_id_as_original": true,
+          "new_share_url_differs_from_original": true
+        },
+        "proposed_reply": "已重新分享《团队周报.pdf》：[新分享链接](http://127.0.0.1:54814/s/<redacted>)。"
+      },
+      {
+        "case": 6,
+        "request": "把本地 <sandbox>/不存在的报告.pdf 分享出去，把链接给我。",
+        "executions": [
+          {
+            "command": "test -f '<sandbox>/不存在的报告.pdf'",
+            "exit_code": 1,
+            "output": ""
+          },
+          {
+            "command": "test -e '<sandbox>/不存在的报告.pdf'",
+            "exit_code": 1,
+            "output": ""
+          }
+        ],
+        "result": "correct_path_required",
+        "observed": "普通文件检查和存在性检查均退出 1，未执行上传或分享命令。",
+        "proposed_reply": "本地文件不存在：`<sandbox>/不存在的报告.pdf`。请提供正确的文件路径。"
+      }
+    ]
+  },
+  "parent_verification": {
+    "verified_at": "2026-11-13T20:36:49+08:00",
+    "scenario_count": 7,
+    "passed": 7,
+    "failed": 0,
+    "new_link_differs": true,
+    "missing_path_created_no_file": true,
+    "files_total_after": 3,
+    "commands": [
+      {
+        "argv": [
+          "fileshare",
+          "get",
+          "6e5042f5-2c9e-4460-81fe-92a77650169c",
+          "--json"
+        ],
+        "exit_code": 0,
+        "json": {
+          "created_at": 1794573089508,
+          "file_id": "6e5042f5-2c9e-4460-81fe-92a77650169c",
+          "mime_type": "application/pdf",
+          "name": "report.pdf",
+          "share_status": "unshared",
+          "share_url": null,
+          "size_bytes": 610
+        }
+      },
+      {
+        "argv": [
+          "fileshare",
+          "get",
+          "6d84f7dd-8191-45c9-b90d-36f73aa04c94",
+          "--json"
+        ],
+        "exit_code": 0,
+        "json": {
+          "created_at": 1794573089495,
+          "file_id": "6d84f7dd-8191-45c9-b90d-36f73aa04c94",
+          "mime_type": "application/pdf",
+          "name": "report.pdf",
+          "share_status": "shared",
+          "share_url": "http://127.0.0.1:54814/s/<redacted>",
+          "size_bytes": 610
+        }
+      },
+      {
+        "argv": [
+          "fileshare",
+          "get",
+          "92910bd9-7232-417c-8ff4-94b298028050",
+          "--json"
+        ],
+        "exit_code": 0,
+        "json": {
+          "created_at": 1794573233781,
+          "file_id": "92910bd9-7232-417c-8ff4-94b298028050",
+          "mime_type": "application/pdf",
+          "name": "团队周报.pdf",
+          "share_status": "shared",
+          "share_url": "http://127.0.0.1:54814/s/<redacted>",
+          "size_bytes": 590
+        }
+      },
+      {
+        "argv": [
+          "fileshare",
+          "list",
+          "--json"
+        ],
+        "exit_code": 0,
+        "json": {
+          "items": [
+            {
+              "created_at": 1794573233781,
+              "file_id": "92910bd9-7232-417c-8ff4-94b298028050",
+              "mime_type": "application/pdf",
+              "name": "团队周报.pdf",
+              "share_status": "shared",
+              "share_url": "http://127.0.0.1:54814/s/<redacted>",
+              "size_bytes": 590
+            },
+            {
+              "created_at": 1794573089508,
+              "file_id": "6e5042f5-2c9e-4460-81fe-92a77650169c",
+              "mime_type": "application/pdf",
+              "name": "report.pdf",
+              "share_status": "unshared",
+              "share_url": null,
+              "size_bytes": 610
+            },
+            {
+              "created_at": 1794573089495,
+              "file_id": "6d84f7dd-8191-45c9-b90d-36f73aa04c94",
+              "mime_type": "application/pdf",
+              "name": "report.pdf",
+              "share_status": "shared",
+              "share_url": "http://127.0.0.1:54814/s/<redacted>",
+              "size_bytes": 610
+            }
+          ],
+          "page": 1,
+          "page_size": 20,
+          "total": 3
+        }
+      }
+    ],
+    "anonymous_checks": [
+      {
+        "check": "original_weekly_link",
+        "http_status": 404,
+        "body_sha256": "5579d1c0f3c8f89473e0e8498a5fd9a3d49c97fc0d5028767b3630f32e3bce30",
+        "link_fingerprint_sha256": "441f05c62c8a64dd2f626f46249eccf31f221d60896a6ee7dc04c3c3ee3be47e"
+      },
+      {
+        "check": "new_weekly_link",
+        "http_status": 200,
+        "body_sha256": "13411b25ff19c0069e73bcaec60a3921eae6ac1656928fa1e9e2213f6daf20d0",
+        "link_fingerprint_sha256": "798e334294a033fe0bf845a19c34c989b7011c054fc8a5b5a5117df37ccd7dd9"
+      },
+      {
+        "check": "selected_report_link",
+        "http_status": 404,
+        "body_sha256": "5579d1c0f3c8f89473e0e8498a5fd9a3d49c97fc0d5028767b3630f32e3bce30",
+        "link_fingerprint_sha256": "0e993255e9093cd21e8d42cf2cb91a6061fc0c96eea91458fce5cbde208bffcb"
+      },
+      {
+        "check": "sibling_report_link",
+        "http_status": 200,
+        "body_sha256": "14abcad4bfe732b2e0a495e9f429b61e2f817b13cd8ea72e9f6568008cf1a701",
+        "link_fingerprint_sha256": "ef553efbd79a878226e3d36b71797bfea3c769e332c4cb5d68defef0a3e404bc"
+      }
+    ]
+  },
+  "extra_round": {
+    "execution": {
+      "kind": "independent_skill_forward_test_extra",
+      "skill": "<project>/skills/fileshare/SKILL.md",
+      "environment": {
+        "sandbox": "<sandbox-extra>",
+        "cli_directory": "<project>/work/agent-cli/bin",
+        "environment_unset_for_each_cli_call": [
+          "FILESHARE_SERVER",
+          "FILESHARE_TOKEN"
+        ],
+        "config_contents_read": false,
+        "used_only_current_round_file_id": true
+      },
+      "cases": [
+        {
+          "case": 1,
+          "request": "把本地 <sandbox-extra>/团队周报.pdf 上传保存，暂时不要分享。",
+          "config": "cli.json",
+          "executions": [
+            {
+              "command": "test -f '<sandbox-extra>/团队周报.pdf'",
+              "exit_code": 0,
+              "output": ""
+            },
+            {
+              "command": "env -u FILESHARE_SERVER -u FILESHARE_TOKEN FILESHARE_CONFIG='<sandbox-extra>/cli.json' PATH=\"<project>/work/agent-cli/bin:$PATH\" fileshare upload '<sandbox-extra>/团队周报.pdf' --json",
+              "exit_code": 0,
+              "output": "{\"created_at\":1794573526696,\"file_id\":\"6b1953b6-eaed-4ec4-a4b8-3c7ffc3910c0\",\"mime_type\":\"application/pdf\",\"name\":\"团队周报.pdf\",\"share_status\":\"unshared\",\"share_url\":null,\"size_bytes\":590}\n",
+              "json": {
+                "created_at": 1794573526696,
+                "file_id": "6b1953b6-eaed-4ec4-a4b8-3c7ffc3910c0",
+                "mime_type": "application/pdf",
+                "name": "团队周报.pdf",
+                "share_status": "unshared",
+                "share_url": null,
+                "size_bytes": 590
+              }
+            }
+          ],
+          "result": "completed",
+          "proposed_reply": "已上传保存《团队周报.pdf》，暂未分享。文件 ID：`6b1953b6-eaed-4ec4-a4b8-3c7ffc3910c0`。"
+        },
+        {
+          "case": 2,
+          "request": "把刚才上传的团队周报.pdf 分享出去，把链接给我。",
+          "config": "cli.json",
+          "executions": [
+            {
+              "command": "env -u FILESHARE_SERVER -u FILESHARE_TOKEN FILESHARE_CONFIG='<sandbox-extra>/cli.json' PATH=\"<project>/work/agent-cli/bin:$PATH\" fileshare share 6b1953b6-eaed-4ec4-a4b8-3c7ffc3910c0 --json",
+              "exit_code": 0,
+              "output": "{\"created_at\":1794573526696,\"file_id\":\"6b1953b6-eaed-4ec4-a4b8-3c7ffc3910c0\",\"mime_type\":\"application/pdf\",\"name\":\"团队周报.pdf\",\"share_status\":\"shared\",\"share_url\":\"http://127.0.0.1:56084/s/<redacted>\",\"size_bytes\":590}\n",
+              "json": {
+                "created_at": 1794573526696,
+                "file_id": "6b1953b6-eaed-4ec4-a4b8-3c7ffc3910c0",
+                "mime_type": "application/pdf",
+                "name": "团队周报.pdf",
+                "share_status": "shared",
+                "share_url": "http://127.0.0.1:56084/s/<redacted>",
+                "size_bytes": 590
+              }
+            }
+          ],
+          "result": "completed",
+          "proposed_reply": "已分享《团队周报.pdf》：[分享链接](http://127.0.0.1:56084/s/<redacted>)。"
+        },
+        {
+          "case": 3,
+          "request": "删除刚才上传的团队周报.pdf。",
+          "config": "cli.json",
+          "executions": [
+            {
+              "command": "env -u FILESHARE_SERVER -u FILESHARE_TOKEN FILESHARE_CONFIG='<sandbox-extra>/cli.json' PATH=\"<project>/work/agent-cli/bin:$PATH\" fileshare delete 6b1953b6-eaed-4ec4-a4b8-3c7ffc3910c0 --json",
+              "exit_code": 0,
+              "output": "{\"deleted\":true,\"file_id\":\"6b1953b6-eaed-4ec4-a4b8-3c7ffc3910c0\"}\n",
+              "json": {
+                "deleted": true,
+                "file_id": "6b1953b6-eaed-4ec4-a4b8-3c7ffc3910c0"
+              }
+            }
+          ],
+          "result": "completed",
+          "proposed_reply": "已删除《团队周报.pdf》（ID：`6b1953b6-eaed-4ec4-a4b8-3c7ffc3910c0`）。"
+        },
+        {
+          "case": 4,
+          "request": "查一下已有的 report.pdf。",
+          "config": "case-a.json",
+          "executions": [
+            {
+              "command": "env -u FILESHARE_SERVER -u FILESHARE_TOKEN FILESHARE_CONFIG='<sandbox-extra>/case-a.json' PATH=\"<project>/work/agent-cli/bin:$PATH\" fileshare list --search 'report.pdf' --page 1 --page-size 20 --json",
+              "exit_code": 1,
+              "output": "unauthorized: 访问令牌无效 (HTTP 401)\n"
+            }
+          ],
+          "result": "authorization_failed",
+          "proposed_reply": "查询失败：访问令牌无效（HTTP 401）。请检查访问令牌配置后重试。",
+          "observed_http_status": 401
+        },
+        {
+          "case": 5,
+          "request": "把本地 <sandbox-extra>/oversized.bin 分享出去，把链接给我。",
+          "config": "cli.json",
+          "executions": [
+            {
+              "command": "test -f '<sandbox-extra>/oversized.bin'",
+              "exit_code": 0,
+              "output": ""
+            },
+            {
+              "command": "env -u FILESHARE_SERVER -u FILESHARE_TOKEN FILESHARE_CONFIG='<sandbox-extra>/cli.json' PATH=\"<project>/work/agent-cli/bin:$PATH\" fileshare upload '<sandbox-extra>/oversized.bin' --share --json",
+              "exit_code": 1,
+              "output": "file_too_large: 文件超过上传大小限制 (HTTP 413)\n"
+            }
+          ],
+          "result": "size_limit_rejected",
+          "proposed_reply": "上传失败：文件超过服务上传大小限制（HTTP 413），未获得分享链接。请换用符合大小限制的文件。",
+          "observed_http_status": 413
+        },
+        {
+          "case": 6,
+          "request": "查询已有文件。",
+          "config": "case-b.json",
+          "executions": [
+            {
+              "command": "env -u FILESHARE_SERVER -u FILESHARE_TOKEN FILESHARE_CONFIG='<sandbox-extra>/case-b.json' PATH=\"<project>/work/agent-cli/bin:$PATH\" fileshare list --page 1 --page-size 20 --json",
+              "exit_code": 1,
+              "output": "request failed: check server address, connectivity and timeout\n"
+            }
+          ],
+          "result": "request_failed",
+          "proposed_reply": "查询失败：请求未完成，尚未取得文件列表。请检查服务地址、网络连通性和超时设置后重试。",
+          "observed_duration_seconds": 7.768146
+        }
+      ]
+    },
+    "parent_verification": {
+      "verified_at": "2026-11-13T20:40:45+08:00",
+      "scenario_count": 6,
+      "passed": 6,
+      "failed": 0,
+      "active_files_after": 2,
+      "total_files_including_deleted": 3,
+      "untouched_seed_ids": [
+        "eef8a4eb-0e36-406d-8a37-1437a38a1dd4",
+        "8338f9b6-0ecb-4942-896d-332284308cff"
+      ],
+      "deleted_file_id": "6b1953b6-eaed-4ec4-a4b8-3c7ffc3910c0",
+      "deleted_file_get_exit_code": 1,
+      "deleted_content_http_status": 404,
+      "deleted_disk_content_removed": true,
+      "negative_agent_replies_contain_no_share_link": true
+    }
+  },
+  "summary": {
+    "passed": 13,
+    "failed": 0,
+    "scope": "13 explicit-Skill natural-language scenarios in two isolated services; one independent Agent with no main-chat history."
+  }
+}
