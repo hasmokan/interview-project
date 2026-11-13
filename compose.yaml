@@ -1,0 +1,24 @@
+services:
+  fileshare:
+    build:
+      context: .
+      args:
+        NODE_IMAGE: ${NODE_IMAGE:-m.daocloud.io/docker.io/library/node:24-alpine}
+        GO_IMAGE: ${GO_IMAGE:-m.daocloud.io/docker.io/library/golang:1.26-alpine}
+        RUNTIME_IMAGE: ${RUNTIME_IMAGE:-m.daocloud.io/docker.io/library/alpine:3.22}
+        GOPROXY: ${GOPROXY:-https://mirrors.aliyun.com/goproxy/}
+        GOSUMDB: ${GOSUMDB:-sum.golang.google.cn}
+    ports:
+      - "${FILESHARE_PORT:-8080}:8080"
+    environment:
+      FILESHARE_PUBLIC_URL: ${FILESHARE_PUBLIC_URL:-http://localhost:8080}
+      FILESHARE_ADMIN_USER: ${FILESHARE_ADMIN_USER:-admin}
+      FILESHARE_PASSWORD_HASH: ${FILESHARE_PASSWORD_HASH:?run scripts/setup-env.py first}
+      FILESHARE_TOKEN_HASH: ${FILESHARE_TOKEN_HASH:?run scripts/setup-env.py first}
+      FILESHARE_SESSION_KEY: ${FILESHARE_SESSION_KEY:?run scripts/setup-env.py first}
+      FILESHARE_MAX_UPLOAD_BYTES: ${FILESHARE_MAX_UPLOAD_BYTES:-104857600}
+    volumes:
+      - fileshare-data:/data
+    restart: unless-stopped
+volumes:
+  fileshare-data:

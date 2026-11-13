@@ -1,0 +1,14 @@
+.DS_Store
+/data/
+/work/
+/bin/
+.env
+.env.*
+!.env.example
+web/node_modules/
+web/dist/
+web/.tanstack/
+web/test-results/
+web/playwright-report/
+__pycache__/
+*.pyc

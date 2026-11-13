@@ -1,0 +1,11 @@
+.git
+.DS_Store
+data
+work
+bin
+.env
+web/node_modules
+web/dist
+web/.tanstack
+web/test-results
+web/playwright-report
