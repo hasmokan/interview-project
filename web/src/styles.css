@@ -79,6 +79,29 @@ a svg {
   justify-content: space-between;
   padding: 0 36px;
 }
+.header-start {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: var(--green);
+  font-size: 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.back-link:hover {
+  background: #edf4ef;
+  border-color: #b4cdbd;
+}
 .brand {
   display: inline-flex;
   align-items: center;
@@ -694,6 +717,8 @@ td:last-child {
 .header-caption {
   font-size: 11px;
   color: #92a095;
+  margin-left: 16px;
+  text-align: right;
 }
 .share-main {
   max-width: 900px;
@@ -1074,6 +1099,14 @@ td:last-child {
   }
   .header-caption {
     font-size: 9px;
+  }
+  .header-start {
+    gap: 10px;
+  }
+  .back-link {
+    min-height: 40px;
+    padding: 8px;
+    font-size: 11px;
   }
   .preview-footer {
     padding: 15px;

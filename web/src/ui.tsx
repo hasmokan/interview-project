@@ -24,6 +24,7 @@ type IconName =
   | "link"
   | "check"
   | "arrow"
+  | "back"
   | "trash"
   | "image"
   | "download"
@@ -64,6 +65,7 @@ const paths: Record<IconName, ReactNode> = {
   ),
   check: <path d="m5 12 4 4L19 6" />,
   arrow: <path d="M4 12h16m-6-6 6 6-6 6" />,
+  back: <path d="M20 12H4m6-6-6 6 6 6" />,
   trash: (
     <>
       <path d="M3 6h18M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7M14 10v7" />
@@ -126,11 +128,30 @@ function Brand() {
     </a>
   );
 }
-function Header({ children }: { children?: ReactNode }) {
+function Header({
+  children,
+  backToFiles = false,
+}: {
+  children?: ReactNode;
+  backToFiles?: boolean;
+}) {
   return (
     <header className="header">
       <div className="header-inner">
-        <Brand />
+        <div className="header-start">
+          {backToFiles ? (
+            <a
+              className="back-link"
+              href="/"
+              aria-label="返回文件空间"
+              title="返回文件空间"
+            >
+              <Icon name="back" size={18} />
+              <span>返回</span>
+            </a>
+          ) : null}
+          <Brand />
+        </div>
         {children}
       </div>
     </header>
@@ -723,7 +744,7 @@ export function SharePage({ token }: { token: string }) {
   const content = `/api/public/shares/${encodeURIComponent(token)}/content`;
   return (
     <>
-      <Header>
+      <Header backToFiles>
         <span className="header-caption">一份来自团队的分享</span>
       </Header>
       <main className="share-main">
